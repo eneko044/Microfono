@@ -30,7 +30,7 @@
     <string name="no_speaker_mic">No se ha encontrado el micrófono superior/trasero en este móvil.</string>
     <string name="other_apps_none">Para comprobarlo: activa el interruptor, graba un audio en WhatsApp y vuelve aquí; verás qué micrófono usó.</string>
     <string name="other_apps_seen">Última grabación de otra app (%1$s): micrófono %2$s</string>
-    <string name="system_note">¿Qué es Shizuku? Una app gratuita que NO necesita root. Android no deja a una app normal cambiar el micrófono de otras apps; Shizuku usa la \"depuración inalámbrica\" de Android (viene en todos los móviles) para darle ese permiso a esta app. Se configura una vez.\n\nAl reiniciar el móvil hay que repetir solo el paso 4 (abrir Shizuku y pulsar Iniciar, con Wi‑Fi). Te saldrá un aviso.\n\nSi no consigues instalar apps o activar la depuración, mira en Ajustes › Seguridad y privacidad › Bloqueador automático y desactívalo mientras lo configuras.\n\n¿No quieres complicarte? Con unos auriculares con micrófono (Bluetooth o USB‑C), WhatsApp e Instagram usan el micrófono de los auriculares automáticamente.</string>
+    <string name="system_note">¿Qué es Shizuku? Una app gratuita que NO necesita root. Android no deja a una app normal cambiar el micrófono de otras apps; Shizuku usa la \"depuración inalámbrica\" de Android (viene en todos los móviles) para darle ese permiso a esta app. Se configura una vez.\n\nAl reiniciar el móvil Android lo olvida. Para que vuelva solo: usa Shizuku 13.6 o más nuevo, entra en sus Ajustes y activa \"Iniciar en el arranque\" (aunque ponga \"root\", en Android 13+ funciona sin root). Al emparejar, elige \"Permitir siempre en esta red\". Así, al encender el móvil con esa Wi‑Fi, Shizuku arranca solo y esta app vuelve a poner el micrófono sin abrirla. Si no lo consigue (por ejemplo, sin Wi‑Fi), te saldrá un aviso: abre Shizuku y pulsa Iniciar.\n\nSi no consigues instalar apps o activar la depuración, mira en Ajustes › Seguridad y privacidad › Bloqueador automático y desactívalo mientras lo configuras.\n\n¿No quieres complicarte? Con unos auriculares con micrófono (Bluetooth o USB‑C), WhatsApp e Instagram usan el micrófono de los auriculares automáticamente.</string>
     <string name="step1_title">Instala Shizuku</string>
     <string name="step1_detail">Es gratis y está en Google Play. Instálala y vuelve a esta app.</string>
     <string name="step1_button">Abrir Google Play</string>
@@ -49,5 +49,5 @@
     <string name="step5_button">Dar permiso</string>
     <string name="boot_channel">Aviso tras reiniciar</string>
     <string name="boot_title">Reactiva el micrófono del altavoz</string>
-    <string name="boot_text">El móvil se ha reiniciado. Abre Shizuku y pulsa \"Iniciar\" (con Wi‑Fi): el micrófono del altavoz se volverá a activar solo.</string>
+    <string name="boot_text">Si en un minuto no desaparece este aviso, conéctate a la Wi‑Fi, abre Shizuku y pulsa \"Iniciar\": el micrófono del altavoz se volverá a activar solo.</string>
 </resources>

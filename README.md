@@ -29,8 +29,18 @@ Configuración (una vez):
 4. En Shizuku pulsa *Iniciar*.
 5. En esta app pulsa *Dar permiso* y activa el interruptor.
 
-Al reiniciar el móvil Android olvida el ajuste: abre Shizuku y pulsa *Iniciar*
-otra vez y la app lo vuelve a activar sola (avisa con una notificación).
+Al reiniciar el móvil Android olvida el ajuste. Para que vuelva solo:
+
+- Usa Shizuku **13.6 o más nuevo** (si Google Play tiene una anterior, la
+  última está en <https://github.com/RikkaApps/Shizuku/releases>).
+- En los ajustes de Shizuku activa *Iniciar en el arranque* (aunque ponga
+  "root", en Android 13+ también funciona con depuración inalámbrica).
+- Al emparejar, permite la depuración inalámbrica *siempre en esta red*.
+
+Así, al encender el móvil conectado a esa Wi‑Fi, Shizuku arranca solo, avisa a
+esta app y el micrófono vuelve a ponerse sin abrir nada. Si no lo consigue (sin
+Wi‑Fi, por ejemplo), la app avisa con una notificación: abre Shizuku y pulsa
+*Iniciar*.
 
 Para comprobar que funciona, la app muestra qué micrófono usó la última
 grabación de otra app.
