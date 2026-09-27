@@ -33,11 +33,11 @@
             android:layout_height="wrap_content"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/systemActionButton"
+        <LinearLayout
+            android:id="@+id/setupSteps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:orientation="vertical" />
 
         <Switch
             android:id="@+id/systemSwitch"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:alpha="0.7"
-            android:text="@string/system_help"
+            android:text="@string/system_note"
             android:textSize="13sp" />
 
         <TextView

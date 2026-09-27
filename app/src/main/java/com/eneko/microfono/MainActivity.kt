@@ -15,9 +15,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.graphics.Typeface
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.CompoundButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RadioGroup
 import android.widget.Switch
@@ -45,7 +48,7 @@ class MainActivity : Activity() {
     private lateinit var devicesText: TextView
     private lateinit var globalSwitch: Switch
     private lateinit var systemStatus: TextView
-    private lateinit var systemActionButton: Button
+    private lateinit var setupSteps: LinearLayout
     private lateinit var systemSwitch: Switch
     private lateinit var otherAppsText: TextView
 
@@ -123,11 +126,10 @@ class MainActivity : Activity() {
         devicesText = findViewById(R.id.devicesText)
         globalSwitch = findViewById(R.id.globalSwitch)
         systemStatus = findViewById(R.id.systemStatus)
-        systemActionButton = findViewById(R.id.systemActionButton)
+        setupSteps = findViewById(R.id.setupSteps)
         systemSwitch = findViewById(R.id.systemSwitch)
         otherAppsText = findViewById(R.id.otherAppsText)
 
-        systemActionButton.setOnClickListener { onSystemAction() }
         Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
         Shizuku.addBinderReceivedListener(shizukuBinderListener)
         Shizuku.addBinderDeadListener(shizukuDeadListener)
@@ -191,14 +193,7 @@ class MainActivity : Activity() {
             else -> getString(R.string.status_ready)
         }
 
-        val action = when (status) {
-            SystemMicOverride.Status.NOT_INSTALLED -> R.string.action_install
-            SystemMicOverride.Status.NOT_RUNNING -> R.string.action_open
-            SystemMicOverride.Status.NO_PERMISSION -> R.string.action_permission
-            SystemMicOverride.Status.READY -> null
-        }
-        systemActionButton.visibility = if (action == null) View.GONE else View.VISIBLE
-        action?.let { systemActionButton.setText(it) }
+        renderSetupSteps(status)
 
         systemSwitch.setOnCheckedChangeListener(null)
         systemSwitch.isEnabled = status == SystemMicOverride.Status.READY
@@ -206,19 +201,110 @@ class MainActivity : Activity() {
         systemSwitch.setOnCheckedChangeListener(systemListener)
     }
 
-    private fun onSystemAction() {
-        when (SystemMicOverride.status(this)) {
-            SystemMicOverride.Status.NOT_INSTALLED -> openUrl(
-                "market://details?id=${SystemMicOverride.SHIZUKU_PACKAGE}",
-                "https://play.google.com/store/apps/details?id=${SystemMicOverride.SHIZUKU_PACKAGE}"
-            )
-            SystemMicOverride.Status.NOT_RUNNING -> {
-                packageManager.getLaunchIntentForPackage(SystemMicOverride.SHIZUKU_PACKAGE)
-                    ?.let { startActivity(it) }
+    private class Step(
+        val title: String,
+        val detail: String,
+        val done: Boolean,
+        val buttons: List<Pair<String, () -> Unit>>,
+    )
+
+    /** Asistente paso a paso para dejar Shizuku funcionando. */
+    private fun renderSetupSteps(status: SystemMicOverride.Status) {
+        setupSteps.removeAllViews()
+        if (status == SystemMicOverride.Status.READY) return
+
+        val installed = status != SystemMicOverride.Status.NOT_INSTALLED
+        val running = status == SystemMicOverride.Status.NO_PERMISSION
+        val devOptions = try {
+            Settings.Global.getInt(
+                contentResolver, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0
+            ) == 1
+        } catch (_: Exception) {
+            false
+        }
+
+        val steps = listOf(
+            Step(
+                getString(R.string.step1_title), getString(R.string.step1_detail), installed,
+                listOf(getString(R.string.step1_button) to ::openShizukuStore)
+            ),
+            Step(
+                getString(R.string.step2_title), getString(R.string.step2_detail),
+                devOptions || running,
+                listOf(getString(R.string.step2_button) to {
+                    openSettings(Settings.ACTION_DEVICE_INFO_SETTINGS)
+                })
+            ),
+            Step(
+                getString(R.string.step3_title), getString(R.string.step3_detail), running,
+                listOf(
+                    getString(R.string.step3_button_shizuku) to ::openShizuku,
+                    getString(R.string.step3_button_settings) to {
+                        openSettings(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                    },
+                )
+            ),
+            Step(
+                getString(R.string.step4_title), getString(R.string.step4_detail), running,
+                listOf(getString(R.string.step4_button) to ::openShizuku)
+            ),
+            Step(
+                getString(R.string.step5_title), getString(R.string.step5_detail), false,
+                if (running) {
+                    listOf(getString(R.string.step5_button) to {
+                        Shizuku.requestPermission(SystemMicOverride.PERMISSION_REQUEST)
+                    })
+                } else emptyList()
+            ),
+        )
+
+        // Solo se muestran los botones del primer paso pendiente, para no liar.
+        val current = steps.indexOfFirst { !it.done }
+        val pad = (8 * resources.displayMetrics.density).toInt()
+        steps.forEachIndexed { i, step ->
+            val mark = when {
+                step.done -> "✓"
+                i == current -> "➜"
+                else -> "○"
             }
-            SystemMicOverride.Status.NO_PERMISSION ->
-                Shizuku.requestPermission(SystemMicOverride.PERMISSION_REQUEST)
-            SystemMicOverride.Status.READY -> Unit
+            setupSteps.addView(TextView(this).apply {
+                text = "$mark ${i + 1}. ${step.title}"
+                textSize = 16f
+                setTypeface(typeface, Typeface.BOLD)
+                alpha = if (i == current) 1f else 0.6f
+                setPadding(0, pad * 2, 0, 0)
+            })
+            if (i != current) return@forEachIndexed
+            setupSteps.addView(TextView(this).apply {
+                text = step.detail
+                setPadding(0, pad / 2, 0, pad / 2)
+            })
+            for ((label, action) in step.buttons) {
+                setupSteps.addView(Button(this).apply {
+                    text = label
+                    setOnClickListener { action() }
+                })
+            }
+        }
+    }
+
+    private fun openShizukuStore() {
+        openUrl(
+            "market://details?id=${SystemMicOverride.SHIZUKU_PACKAGE}",
+            "https://play.google.com/store/apps/details?id=${SystemMicOverride.SHIZUKU_PACKAGE}"
+        )
+    }
+
+    private fun openShizuku() {
+        val intent = packageManager.getLaunchIntentForPackage(SystemMicOverride.SHIZUKU_PACKAGE)
+        if (intent != null) startActivity(intent) else openShizukuStore()
+    }
+
+    private fun openSettings(action: String) {
+        try {
+            startActivity(Intent(action))
+        } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_SETTINGS))
         }
     }
 
