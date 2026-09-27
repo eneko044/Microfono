@@ -4,15 +4,18 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.media.AudioRecordingConfiguration
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.View
 import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.ProgressBar
@@ -21,6 +24,7 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import rikka.shizuku.Shizuku
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -40,6 +44,10 @@ class MainActivity : Activity() {
     private lateinit var statusText: TextView
     private lateinit var devicesText: TextView
     private lateinit var globalSwitch: Switch
+    private lateinit var systemStatus: TextView
+    private lateinit var systemActionButton: Button
+    private lateinit var systemSwitch: Switch
+    private lateinit var otherAppsText: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var recorder: MediaRecorder? = null
@@ -75,6 +83,32 @@ class MainActivity : Activity() {
         }
     }
 
+    private val systemListener = CompoundButton.OnCheckedChangeListener { _, checked ->
+        setSystemOverride(checked)
+    }
+
+    private val shizukuPermissionListener =
+        Shizuku.OnRequestPermissionResultListener { _, result ->
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                SystemMicOverride.reapplyIfWanted(this)
+            }
+            refreshSystemUi()
+        }
+    private val shizukuBinderListener = Shizuku.OnBinderReceivedListener { refreshSystemUi() }
+    private val shizukuDeadListener = Shizuku.OnBinderDeadListener { refreshSystemUi() }
+
+    /** Muestra qué micrófono usan otras apps cuando graban (para comprobar que funciona). */
+    private val recordingCallback = object : AudioManager.AudioRecordingCallback() {
+        override fun onRecordingConfigChanged(configs: List<AudioRecordingConfiguration>) {
+            if (recorder != null) return
+            val device = configs.firstNotNullOfOrNull { it.audioDevice } ?: return
+            val time = SimpleDateFormat("HH:mm", Locale.ROOT).format(Date())
+            otherAppsText.text = getString(
+                R.string.other_apps_seen, time, MicRouting.describe(device)
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -88,6 +122,16 @@ class MainActivity : Activity() {
         statusText = findViewById(R.id.statusText)
         devicesText = findViewById(R.id.devicesText)
         globalSwitch = findViewById(R.id.globalSwitch)
+        systemStatus = findViewById(R.id.systemStatus)
+        systemActionButton = findViewById(R.id.systemActionButton)
+        systemSwitch = findViewById(R.id.systemSwitch)
+        otherAppsText = findViewById(R.id.otherAppsText)
+
+        systemActionButton.setOnClickListener { onSystemAction() }
+        Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
+        Shizuku.addBinderReceivedListener(shizukuBinderListener)
+        Shizuku.addBinderDeadListener(shizukuDeadListener)
+        audioManager.registerAudioRecordingCallback(recordingCallback, handler)
 
         recordButton.setOnClickListener {
             if (recorder != null) stopRecording() else startRecording()
@@ -108,6 +152,105 @@ class MainActivity : Activity() {
         globalSwitch.setOnCheckedChangeListener(null)
         globalSwitch.isChecked = GlobalSpeakerMicService.isRunning
         globalSwitch.setOnCheckedChangeListener(globalListener)
+
+        SystemMicOverride.reapplyIfWanted(this)
+        refreshSystemUi()
+    }
+
+    override fun onDestroy() {
+        Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
+        Shizuku.removeBinderReceivedListener(shizukuBinderListener)
+        Shizuku.removeBinderDeadListener(shizukuDeadListener)
+        audioManager.unregisterAudioRecordingCallback(recordingCallback)
+        super.onDestroy()
+    }
+
+    private fun refreshSystemUi() {
+        val status = SystemMicOverride.status(this)
+        val active = if (status == SystemMicOverride.Status.READY) {
+            try {
+                SystemMicOverride.currentAddress()
+            } catch (_: Exception) {
+                null
+            }
+        } else null
+
+        systemStatus.text = when {
+            active != null -> getString(
+                R.string.status_active,
+                MicRouting.builtinMics(audioManager)
+                    .firstOrNull { it.address == active }
+                    ?.let { MicRouting.describe(it) } ?: active
+            )
+            status == SystemMicOverride.Status.NOT_INSTALLED ->
+                getString(R.string.status_not_installed)
+            status == SystemMicOverride.Status.NOT_RUNNING ->
+                getString(R.string.status_not_running)
+            status == SystemMicOverride.Status.NO_PERMISSION ->
+                getString(R.string.status_no_permission)
+            else -> getString(R.string.status_ready)
+        }
+
+        val action = when (status) {
+            SystemMicOverride.Status.NOT_INSTALLED -> R.string.action_install
+            SystemMicOverride.Status.NOT_RUNNING -> R.string.action_open
+            SystemMicOverride.Status.NO_PERMISSION -> R.string.action_permission
+            SystemMicOverride.Status.READY -> null
+        }
+        systemActionButton.visibility = if (action == null) View.GONE else View.VISIBLE
+        action?.let { systemActionButton.setText(it) }
+
+        systemSwitch.setOnCheckedChangeListener(null)
+        systemSwitch.isEnabled = status == SystemMicOverride.Status.READY
+        systemSwitch.isChecked = active != null
+        systemSwitch.setOnCheckedChangeListener(systemListener)
+    }
+
+    private fun onSystemAction() {
+        when (SystemMicOverride.status(this)) {
+            SystemMicOverride.Status.NOT_INSTALLED -> openUrl(
+                "market://details?id=${SystemMicOverride.SHIZUKU_PACKAGE}",
+                "https://play.google.com/store/apps/details?id=${SystemMicOverride.SHIZUKU_PACKAGE}"
+            )
+            SystemMicOverride.Status.NOT_RUNNING -> {
+                packageManager.getLaunchIntentForPackage(SystemMicOverride.SHIZUKU_PACKAGE)
+                    ?.let { startActivity(it) }
+            }
+            SystemMicOverride.Status.NO_PERMISSION ->
+                Shizuku.requestPermission(SystemMicOverride.PERMISSION_REQUEST)
+            SystemMicOverride.Status.READY -> Unit
+        }
+    }
+
+    private fun openUrl(vararg urls: String) {
+        for (url in urls) {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                return
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private fun setSystemOverride(enable: Boolean) {
+        try {
+            if (enable) {
+                val mic = MicRouting.speakerMic(audioManager)
+                if (mic == null) {
+                    Toast.makeText(this, R.string.no_speaker_mic, Toast.LENGTH_LONG).show()
+                } else {
+                    SystemMicOverride.apply(mic)
+                    SystemMicOverride.setWanted(this, true)
+                }
+            } else {
+                SystemMicOverride.clear()
+                SystemMicOverride.setWanted(this, false)
+            }
+        } catch (e: Exception) {
+            val msg = generateSequence<Throwable>(e) { it.cause }.last().message ?: e.toString()
+            Toast.makeText(this, "No se pudo cambiar: $msg", Toast.LENGTH_LONG).show()
+        }
+        refreshSystemUi()
     }
 
     override fun onStop() {

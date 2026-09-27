@@ -6,21 +6,44 @@ Pensada para un Samsung Galaxy S24 FE con el micrófono de abajo estropeado.
 
 ## Qué hace
 
-1. **Elegir micrófono**
-   - *Micrófono del altavoz (como en llamadas)* — recomendado. Pone el móvil en
-     el mismo modo que una llamada con altavoz y graba con la fuente de voz de
-     llamada, así que usa el mismo micrófono que ya sabes que funciona.
-   - *Micrófono superior/trasero (modo cámara)* — alternativa, el que usa la
-     cámara al grabar vídeo.
-   - *Micrófono inferior* — solo para comparar.
-2. **Grabar, escuchar y enviar** — la nota se graba en OGG/Opus (el formato de
-   WhatsApp) y con el botón *Enviar* se comparte a WhatsApp, Telegram, etc.
-   Mientras grabas se ve el nivel de audio y qué micrófono se está usando.
-3. **Modo global (experimental)** — deja el móvil en "modo llamada con
-   altavoz" en segundo plano (con una notificación para desactivarlo) para que
-   otras apps, como las notas de voz de WhatsApp, intenten usar ese micrófono.
-   Android no deja a una app elegir el micrófono de otra, así que no está
-   garantizado que funcione en todas.
+### 1. Todas las apps (WhatsApp, Instagram, Telegram…) — con Shizuku
+
+Un interruptor que cambia el micrófono **de todo el móvil** al del altavoz, así
+que grabas los audios normalmente desde WhatsApp, Instagram o cualquier app.
+Funciona en segundo plano y no gasta batería.
+
+Android no deja a una app normal cambiar el micrófono de otras apps. Por eso se
+usa [Shizuku](https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api)
+(gratis, sin root), que da permisos de ADB. Con ellos la app usa la opción
+interna de Android de "micrófono preferido para cada fuente de grabación"
+(`setPreferredDevicesForCapturePreset`) para las fuentes `MIC`, `CAMCORDER`,
+`VOICE_RECOGNITION`, `VOICE_COMMUNICATION`, `UNPROCESSED` y `VOICE_PERFORMANCE`.
+
+Configuración (una vez):
+
+1. Instala Shizuku desde Google Play.
+2. Activa las opciones de desarrollador: *Ajustes › Acerca del teléfono ›
+   Información de software* › toca 7 veces *Número de compilación*.
+3. Con Wi‑Fi, en Shizuku pulsa *Emparejar* y sigue los pasos (*Opciones de
+   desarrollador › Depuración inalámbrica › Vincular dispositivo con código*).
+4. En Shizuku pulsa *Iniciar*.
+5. En esta app pulsa *Dar permiso* y activa el interruptor.
+
+Al reiniciar el móvil Android olvida el ajuste: abre Shizuku y pulsa *Iniciar*
+otra vez y la app lo vuelve a activar sola (avisa con una notificación).
+
+Para comprobar que funciona, la app muestra qué micrófono usó la última
+grabación de otra app.
+
+### 2. Grabar aquí y enviar
+
+Graba con el micrófono del altavoz desde la propia app y comparte la nota
+(OGG/Opus) a WhatsApp, Telegram, etc. Útil si no quieres usar Shizuku.
+
+### 3. Método alternativo sin Shizuku (experimental)
+
+Deja el móvil en "modo llamada con altavoz" en segundo plano. Puede que no
+funcione en todas las apps.
 
 Abajo del todo aparece la lista de micrófonos que detecta el móvil.
 
@@ -29,7 +52,7 @@ Abajo del todo aparece la lista de micrófonos que detecta el móvil.
 - Descarga `MicrofonoAltavoz.apk` (desde *Releases* o desde la pestaña
   *Actions* → última ejecución → *Artifacts*).
 - Ábrelo en el móvil y permite "instalar apps desconocidas" cuando lo pida.
-- Concede el permiso de micrófono (y notificaciones para el modo global).
+- Concede el permiso de micrófono y notificaciones.
 
 ## Compilar
 

@@ -25,6 +25,46 @@
 
         <TextView
             style="@style/SectionTitle"
+            android:text="@string/section_system" />
+
+        <TextView
+            android:id="@+id/systemStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/systemActionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <Switch
+            android:id="@+id/systemSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:minHeight="48dp"
+            android:text="@string/system_switch"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/otherAppsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/other_apps_none" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:alpha="0.7"
+            android:text="@string/system_help"
+            android:textSize="13sp" />
+
+        <TextView
+            style="@style/SectionTitle"
             android:text="@string/section_mic" />
 
         <RadioGroup
@@ -52,12 +92,9 @@
                 android:text="@string/mode_bottom" />
         </RadioGroup>
 
-        <TextView
-            style="@style/SectionTitle"
-            android:text="@string/section_record" />
-
         <Button
             android:id="@+id/recordButton"
+            android:layout_marginTop="8dp"
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:text="@string/record"

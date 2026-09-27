@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Micrófono altavoz</string>
-    <string name="intro">Graba notas de voz con el micrófono que usa el móvil en las llamadas en altavoz (el de arriba/trasero), en lugar del micrófono inferior.</string>
-    <string name="section_mic">1. Elige el micrófono</string>
+    <string name="intro">Usa el micrófono de las llamadas en altavoz (el de arriba/trasero) en lugar del micrófono inferior.</string>
+    <string name="section_mic">Grabar aquí y enviar</string>
     <string name="mode_speaker">Micrófono del altavoz (como en llamadas) — recomendado</string>
     <string name="mode_top">Micrófono superior/trasero (modo cámara)</string>
     <string name="mode_bottom">Micrófono inferior (normal, solo para comparar)</string>
-    <string name="section_record">2. Graba y envía</string>
     <string name="record">● Grabar</string>
     <string name="stop">■ Parar</string>
     <string name="play">▶ Escuchar</string>
     <string name="stop_play">■ Parar</string>
     <string name="share">Enviar (WhatsApp, Telegram…)</string>
-    <string name="section_global">3. Modo global (experimental)</string>
+    <string name="section_global">Método alternativo sin Shizuku (experimental)</string>
     <string name="global_switch">Forzar micrófono de altavoz en otras apps</string>
     <string name="global_desc">Mantiene el móvil en \"modo llamada con altavoz\" en segundo plano para que otras apps (por ejemplo, las notas de voz de WhatsApp) intenten usar el micrófono del altavoz. Android no permite elegir el micrófono de otras apps directamente, así que puede no funcionar en todas. Mientras esté activo, el audio multimedia puede sonar por el altavoz y gasta algo más de batería. Desactívalo cuando termines.</string>
     <string name="section_devices">Micrófonos detectados</string>
@@ -21,4 +20,21 @@
     <string name="notif_title">Micrófono de altavoz activo</string>
     <string name="notif_text">Otras apps intentarán usar el micrófono del altavoz.</string>
     <string name="notif_stop">Desactivar</string>
+    <string name="section_system">Todas las apps (WhatsApp, Instagram…)</string>
+    <string name="system_switch">Usar el micrófono del altavoz en todas las apps</string>
+    <string name="status_not_installed">✗ Falta instalar Shizuku (gratis)</string>
+    <string name="status_not_running">✗ Shizuku está instalado pero no iniciado</string>
+    <string name="status_no_permission">✗ Falta dar permiso a esta app en Shizuku</string>
+    <string name="status_ready">✓ Shizuku listo</string>
+    <string name="status_active">✓ Activo: todas las apps usan el micrófono %1$s</string>
+    <string name="action_install">Instalar Shizuku</string>
+    <string name="action_open">Abrir Shizuku para iniciarlo</string>
+    <string name="action_permission">Dar permiso</string>
+    <string name="no_speaker_mic">No se ha encontrado el micrófono superior/trasero en este móvil.</string>
+    <string name="other_apps_none">Para comprobarlo: activa el interruptor, graba un audio en WhatsApp y vuelve aquí; verás qué micrófono usó.</string>
+    <string name="other_apps_seen">Última grabación de otra app (%1$s): micrófono %2$s</string>
+    <string name="system_help">Android no deja a las apps normales cambiar el micrófono de otras apps. Shizuku es una app gratuita que da permisos de \"modo desarrollador\" sin root, y con ellos esta app cambia el micrófono para todo el móvil. Se configura una vez:\n\n1. Instala Shizuku desde Google Play.\n2. Activa las opciones de desarrollador: Ajustes › Acerca del teléfono › Información de software › toca 7 veces \"Número de compilación\".\n3. Conéctate a una Wi‑Fi. En Shizuku pulsa \"Emparejar\" (depuración inalámbrica) y sigue los pasos: Ajustes › Opciones de desarrollador › Depuración inalámbrica › Vincular dispositivo con código de vinculación, y escribe el código en la notificación de Shizuku.\n4. En Shizuku pulsa \"Iniciar\".\n5. Vuelve aquí, pulsa \"Dar permiso\" y activa el interruptor.\n\nFunciona en segundo plano sin gastar batería. Al reiniciar el móvil Android lo olvida: abre Shizuku y pulsa \"Iniciar\" otra vez (con Wi‑Fi) y esta app lo vuelve a activar sola. Te avisará con una notificación.</string>
+    <string name="boot_channel">Aviso tras reiniciar</string>
+    <string name="boot_title">Reactiva el micrófono del altavoz</string>
+    <string name="boot_text">El móvil se ha reiniciado. Abre Shizuku y pulsa \"Iniciar\" (con Wi‑Fi): el micrófono del altavoz se volverá a activar solo.</string>
 </resources>
